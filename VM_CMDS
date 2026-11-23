@@ -1,0 +1,97 @@
+ssh -i "D:\Aws_PEM_KEYS\FASTAPI.pem" ubuntu@13.203.66.100
+
+sudo -i
+adduser mohan
+sudo apt update && sudo apt upgrade -y
+sudo apt update
+python3 --version
+sudo apt install python3-pip
+sudo apt install -y python3.12-venv
+sudo apt install postgresql  postgresql-contrib -y
+
+
+
+psql --version
+sudo cat /etc/passwd
+sudo -u postgres psql
+ls /etc/postgresql/
+cd /etc/postgresql/16/main
+sudo vi postgresql.conf add listen_addresses='*'
+sudo vi pg_hba.conf (i model change md5 where i have peer and allow all)
+systemctl restart postgresql
+psql -U postgres
+
+
+
+
+
+ssh mohan@13.203.66.100
+Password=Mohan@123
+mkdir mohan
+cd ~/app
+rm -rf venv
+python3.12 -m venv venv
+source venv/bin/activate
+python --version
+
+deactivate
+mkdir src
+cd src
+git clone https://github.com/Mohanvamsi4405/FASTAPI.git
+cd ..
+source venv/bin/activate
+
+pip install -r requirements.txt (if any error related to this lib then run this cmd 'sudo apt install -y libpq-dev')
+
+#Loading env variables
+
+export MY_NAME="Mohan"
+printenv
+unset MY_NAME
+printenv
+
+cd ~
+vi ~/.env
+cat ~/.env
+
+set -o allexport; source /home/mohan/.env; set +o allexport
+
+ls -la
+vi .profile (paste "set -o allexport; source /home/mohan/.env; set +o allexport" at the end of the file and save it)
+
+cd app/src/
+alembic upgrade head
+
+uvicorn app.main:app 
+
+pip install gunicorn (If fails pip install uvtools httptools )
+
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:8000
+
+
+ps -aef | grep -i gunicorn
+
+
+
+cd /etc/systemd/system
+create a gunicorn.service in code editor
+sudo vi api.service (create a service for reboot)
+cat api.service
+systemctl start api
+systemctl status api
+systemctl restart api (if need restart) if restarted then run systemctl daemon-reload
+sudo systemctl enable api
+
+
+sudo apt install nginx -y
+systemctl start nginx
+systemctl status nginx
+cd /etc/nginx/sites-enabled 
+(create nginx proxy mapping to our service)
+sudo vi default (paste the code)
+systemctl restart nginx
+
+
+
+sudo apt install python3-certbot-nginx
+sudo certbot --nginx
